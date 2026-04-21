@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WOLF LABS | Radical Candor (B1/B2)</title>
+    
+    <!-- Premium Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { display: ['Montserrat', 'sans-serif'], body: ['Inter', 'sans-serif'], code: ['Fira Code', 'monospace'] },
+                    colors: { 
+                        brand: '#0073C0', /* Corporate Blue */
+                        accent: '#D4AF37', /* Elegant Gold */
+                        correct: '#10b981', 
+                        incorrect: '#ef4444' 
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* --- MOTOR CSS WOLF LABS (CORPORATE HR EDITION) --- */
+        :root {
+            --brand-main: #0073C0; 
+            --accent: #D4AF37; 
+            --darkBase: #060B14; 
+            --darkPanel: #0F172A; 
+            --darkBorder: rgba(255, 255, 255, 0.1);
+            --darkHover: #1E293B;
+            --textMain: #f8fafc;
+            --textDim: #94a3b8;
+            --correct: #10b981;
+            --incorrect: #ef4444;
+            --font-display: 'Montserrat', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-code: 'Fira Code', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        button, input, select, textarea { font-family: var(--font-body); outline: none; }
+
+        body {
+            background-color: var(--darkBase);
+            color: var(--textMain);
+            font-family: var(--font-body);
+            overflow: hidden;
+            height: 100vh; width: 100vw;
+            display: flex; flex-direction: column;
+            position: fixed; 
+            perspective: 1000px;
+        }
+
+        /* Screen Error Effect */
+        .correction-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 9998; box-shadow: inset 0 0 0 rgba(239, 68, 68, 0); transition: box-shadow 0.4s ease; }
+        body.correction-mode .correction-overlay { box-shadow: inset 0 0 150px 20px rgba(239, 68, 68, 0.4); }
+
+        /* Backgrounds & Particles */
+        .bg-layer { position: fixed; inset: 0; z-index: -1; background: radial-gradient(circle at center, #0F172A 0%, #060B14 100%); }
+        .bg-image {
+            position: absolute; inset: 0; background-image: url('https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=2000'); 
+            background-size: cover; background-position: center; opacity: 0.08; filter: grayscale(100%);
+        }
+        .orb { position: absolute; border-radius: 50%; filter: blur(150px); opacity: 0.2; z-index: 3; animation: float 20s infinite alternate;}
+        .orb-1 { width: 60vw; height: 60vw; background: var(--brand-main); top: -20%; left: -20%; }
+        .orb-2 { width: 50vw; height: 50vw; background: var(--accent); bottom: -10%; right: -10%; opacity: 0.1;}
+        @keyframes float { from { transform: translate(0,0); } to { transform: translate(100px, 50px); } }
+
+        /* Top Navbar */
+        .navbar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 30px; height: 75px; background: rgba(6, 11, 20, 0.85); backdrop-filter: blur(30px);
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 100;
+            border-bottom: 1px solid var(--darkBorder); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .logo { color: #fff; font-family: var(--font-display); font-size: 1.2rem; font-weight: 900; letter-spacing: 1px; display: flex; align-items: center; gap: 10px;}
+        .logo i { color: var(--brand-main); }
+        .logo span { background: var(--brand-main); color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; }
+        .teacher-tool {
+            background: rgba(255,255,255,0.05); border: 1px solid var(--darkBorder);
+            color: var(--textDim); width: 45px; height: 45px; border-radius: 50%; cursor: pointer;
+            font-size: 1.1rem; transition: 0.3s; display: flex; align-items: center; justify-content: center;
+        }
+        .teacher-tool:hover { background: var(--darkHover); color: var(--accent); border-color: var(--accent); }
+
+        /* Slides Container */
+        .main-container { flex: 1; position: relative; z-index: 10; padding: 100px 5% 100px 5%; display: flex; align-items: center; justify-content: center; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); overflow-y: auto; overflow-x: hidden; scrollbar-width: none;}
+        .main-container::-webkit-scrollbar { display: none; }
+        .slide { height: 100%; width: 100%; max-width: 1100px; display: none; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transform: translateY(20px); transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); padding: 40px 0;}
+        .slide.active { display: flex; opacity: 1; transform: translateY(0); }
+        .slide::before, .slide::after { content: ''; flex: 1 0 auto; }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(40px);
+            border: 1px solid var(--darkBorder); border-top: 4px solid var(--brand-main);
+            padding: 50px 60px; border-radius: 24px; width: 100%; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
+        }
+
+        /* Typography */
+        h1 { font-family: var(--font-display); font-size: 4.5rem; color: #fff; line-height: 1.1; margin-bottom: 20px; text-align: center; letter-spacing: -2px; text-transform: uppercase;}
+        h2 { font-family: var(--font-display); font-size: 2.2rem; color: var(--accent); margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 15px; text-transform: uppercase;}
+        p { font-size: 1.2rem; color: var(--textDim); line-height: 1.6; text-align: center; margin-bottom: 25px;}
+
+        /* Buttons */
+        .btn-gold { 
+            background: linear-gradient(135deg, var(--accent), #B49020); color: #060B14 !important; 
+            padding: 18px 45px; border: none; border-radius: 50px; font-weight: 900; font-family: var(--font-display); 
+            text-transform: uppercase; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; 
+            justify-content: center; gap: 12px; box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3); letter-spacing: 2px;
+        }
+        .btn-gold:hover { transform: translateY(-4px); filter: brightness(1.1); box-shadow: 0 15px 40px rgba(212, 175, 55, 0.6); }
+        .btn-outline { background: rgba(0,0,0,0.4); border: 2px solid var(--darkBorder); color: #FFFFFF; padding: 16px 40px; border-radius: 50px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 1px; font-family: var(--font-display);}
+        .btn-outline:hover { border-color: var(--brand-main); background: rgba(0, 115, 192, 0.1); transform: translateY(-2px); }
+
+        .input-name { width: 100%; max-width: 450px; padding: 18px 24px; border-radius: 16px; border: 2px solid var(--darkBorder); background: rgba(0,0,0,0.6); color: #fff; font-size: 1.4rem; font-family: var(--font-code); font-weight: bold; text-align: center; margin-bottom: 30px; transition: 0.3s;}
+        .input-name:focus { border-color: var(--accent); box-shadow: 0 0 20px rgba(212, 175, 55, 0.3); outline: none; }
+
+        /* Interactive Containers */
+        .video-wrapper { position: relative; width: 100%; max-width: 850px; aspect-ratio: 16/9; background: #000; border-radius: 20px; overflow: hidden; border: 1px solid var(--darkBorder); box-shadow: 0 20px 40px rgba(0,0,0,0.8); margin-bottom: 25px; z-index: 50; }
+        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; pointer-events: auto !important; z-index: 60; }
+        
+        .speaking-hub { margin-top: 30px; padding: 35px; background: rgba(0,0,0,0.6); border-radius: 20px; border-left: 6px solid var(--accent); text-align: left; width: 100%; display: none; animation: popIn 0.4s ease; box-shadow: inset 0 0 30px rgba(0,0,0,0.5);}
+        .speaking-hub p { color: #fff; margin-bottom: 10px; font-size: 1.1rem; }
+        .starter-reveal-btn { background: rgba(212, 175, 55, 0.1); border: 1px dashed var(--accent); color: var(--accent); padding: 10px 20px; border-radius: 50px; cursor: pointer; transition: 0.2s; font-family: var(--font-code); font-size: 0.9rem; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; }
+        .starter-reveal-btn:hover { background: var(--accent); color: #000; }
+        .starter-content { display: none; margin-top: 20px; padding: 25px; background: rgba(0,0,0,0.8); border-radius: 12px; border-left: 4px solid var(--brand-main); animation: popIn 0.3s ease-out forwards; }
+        .starter-content.active { display: flex; flex-direction: column; gap: 10px; }
+        .starter-phrase { font-family: var(--font-code); font-size: 1.3rem; color: #fff; font-weight: bold;}
+        
+        @keyframes popIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
+
+        /* GAMES & DYNAMICS */
+        .ww-grid { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 20px;}
+        .ww-box { width: 180px; height: 180px; background: rgba(0,0,0,0.4); border-radius: 20px; border: 2px solid var(--darkBorder); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .ww-box:hover { border-color: var(--accent); transform: translateY(-10px); background: rgba(212, 175, 55, 0.05); }
+        .ww-box i { font-size: 3.5rem; color: var(--brand-main); margin-bottom: 10px; transition: 0.3s;}
+        .ww-box.opened { opacity: 0.3; pointer-events: none; filter: grayscale(100%); }
+
+        .mcq-btn { background: rgba(0,0,0,0.5); border: 2px solid var(--darkBorder); color: #fff; padding: 20px 30px; border-radius: 16px; font-family: var(--font-body); font-weight: 600; font-size: 1.2rem; cursor: pointer; transition: 0.3s; text-align: left; width: 100%; box-shadow: 0 10px 20px rgba(0,0,0,0.3); display: flex; align-items: center;}
+        .mcq-btn i { font-size: 1.5rem; margin-right: 15px; color: var(--textDim); transition: 0.3s;}
+        .mcq-btn:hover { background: rgba(255,255,255,0.05); border-color: var(--brand-main); transform: translateX(10px); }
+        .mcq-btn.correct { background: rgba(16, 185, 129, 0.2); border-color: var(--correct); color: var(--correct); pointer-events: none; transform: scale(1.02); }
+        .mcq-btn.correct i { color: var(--correct); }
+        .mcq-btn.incorrect { background: rgba(239, 68, 68, 0.2); border-color: var(--incorrect); color: var(--incorrect); animation: shake 0.4s; pointer-events: none; }
+        .mcq-btn.incorrect i { color: var(--incorrect); }
+
+        .grammar-switch { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; width: 100%; max-width: 900px; margin-inline: auto;}
+        .switch-btn { background: rgba(0,0,0,0.5); border: 2px solid var(--darkBorder); color: white; padding: 15px 40px; border-radius: 50px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.3s; font-family: var(--font-code);}
+        .switch-btn.active { background: var(--brand-main); color: #fff; border-color: var(--brand-main); transform: scale(1.05); }
+        .sandbox-display { background: rgba(0,0,0,0.6); padding: 50px; border-radius: 24px; border-left: 6px solid var(--accent); min-height: 180px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: inset 0 0 30px rgba(0,0,0,0.6); text-align: center; width: 100%; max-width: 900px; margin-inline: auto;}
+
+        .drop-zone { min-height: 100px; border: 3px dashed var(--darkBorder); border-radius: 20px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px; padding: 20px; margin-bottom: 20px; width: 100%; background: rgba(0,0,0,0.3); transition: 0.3s;}
+        .drop-zone.success { border-color: var(--correct); background: rgba(16, 185, 129, 0.1); border-style: solid; }
+        .word-chip { padding: 12px 25px; background: var(--darkPanel); border: 2px solid var(--darkBorder); border-radius: 12px; cursor: pointer; font-weight: 600; transition: 0.2s; color: #fff; font-size: 1.2rem; font-family: var(--font-code);}
+        .word-chip:hover { background: var(--accent); color: #000; border-color: var(--accent); transform: translateY(-3px);}
+        .word-chip.used { opacity: 0.2; pointer-events: none; transform: none; }
+
+        .scale-container { display: flex; flex-direction: column; align-items: center; gap: 20px; width: 100%; max-width: 800px; margin: 0 auto;}
+        .scale-display { background: #000; border: 4px solid var(--darkHover); border-radius: 15px; width: 100%; max-width: 600px; padding: 30px 20px; font-family: var(--font-code); font-size: 1.8rem; font-weight: 900; color: #fff; text-align: center; box-shadow: inset 0 0 20px rgba(255,255,255,0.05); text-transform: uppercase; letter-spacing: 1px; min-height: 120px; display: flex; align-items: center; justify-content: center; transition: opacity 0.2s ease;}
+        .scale-controls { display: flex; gap: 20px; width: 100%; justify-content: center;}
+        .scale-btn { padding: 20px 40px; font-size: 1.2rem; font-family: var(--font-display); font-weight: 900; border-radius: 20px; border: 4px solid var(--darkBorder); background: rgba(0,0,0,0.6); color: #fff; cursor: pointer; transition: 0.2s; flex: 1; max-width: 300px; display: flex; flex-direction: column; align-items: center; gap: 5px;}
+        .scale-btn:hover { background: var(--darkHover); transform: translateY(-5px); border-color: var(--accent); color: var(--accent);}
+        .scale-btn:active { transform: scale(0.95); }
+        .scale-baskets { display: flex; gap: 30px; width: 100%; justify-content: center; margin-top: 20px;}
+        .basket { flex: 1; min-height: 150px; border: 3px dashed var(--darkBorder); border-radius: 20px; padding: 30px 15px 15px; display: flex; flex-wrap: wrap; gap: 10px; align-content: flex-start; position: relative; background: rgba(0,0,0,0.4);}
+        .basket::before { content: attr(data-label); position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--darkBase); padding: 5px 15px; font-family: var(--font-code); font-weight: 800; color: var(--accent); font-size: 1rem; white-space: nowrap; border-radius: 8px; border: 1px solid var(--darkBorder);}
+        .scale-item-chip { background: var(--brand-main); color: #fff; font-family: var(--font-code); font-weight: 700; padding: 8px 15px; border-radius: 8px; font-size: 1.1rem; animation: popIn 0.3s ease-out;}
+
+        .fact-checker-card { background: #fff; color: #000; padding: 40px; border-radius: 20px; width: 100%; max-width: 800px; margin: 0 auto 30px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.6); font-family: 'Courier New', Courier, monospace;}
+        .fact-checker-card::before { content: 'HR CLINICAL FILE'; position: absolute; top: 15px; left: 20px; font-weight: bold; color: #0073C0; font-size: 0.9rem;}
+        .fact-statement { font-size: 1.8rem; font-weight: 800; margin-top: 20px; margin-bottom: 30px; line-height: 1.5; text-align: center; font-family: var(--font-body);}
+        .fact-stamp-area { display: flex; gap: 20px; justify-content: center;}
+        .stamp-btn { padding: 15px 35px; font-family: var(--font-display); font-weight: 900; font-size: 1.2rem; border-radius: 10px; cursor: pointer; transition: 0.2s; border: 3px solid; background: transparent; text-transform: uppercase;}
+        .stamp-btn.verified { color: var(--correct); border-color: var(--correct); }
+        .stamp-btn.verified:hover { background: rgba(16, 185, 129, 0.1); transform: scale(1.05);}
+        .stamp-btn.fake { color: var(--incorrect); border-color: var(--incorrect); }
+        .stamp-btn.fake:hover { background: rgba(239, 68, 68, 0.1); transform: scale(1.05);}
+        .stamp-mark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(3) rotate(-15deg); opacity: 0; pointer-events: none; font-family: var(--font-display); font-weight: 900; font-size: 4rem; padding: 10px 20px; border: 6px solid; border-radius: 15px; text-transform: uppercase;}
+        .stamp-mark.show-verified { color: var(--correct); border-color: var(--correct); animation: stampDrop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .stamp-mark.show-fake { color: var(--incorrect); border-color: var(--incorrect); animation: stampDrop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        .agree-container { display: flex; gap: 15px; width: 100%; max-width: 800px; margin: 0 auto; justify-content: center;}
+        .agree-btn { padding: 20px; font-weight: 800; font-size: 1.1rem; font-family: var(--font-display); border-radius: 16px; border: 2px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.5); transition: 0.3s; flex: 1; cursor: pointer; color: #fff;}
+        .agree-btn:hover { transform: translateY(-5px); border-color: var(--textDim); }
+        .agree-btn.selected.disagree { background: var(--incorrect); border-color: var(--incorrect); color: #fff; transform: scale(1.05);}
+        .agree-btn.selected.neutral { background: #f59e0b; border-color: #f59e0b; color: #fff; transform: scale(1.05);}
+        .agree-btn.selected.agree { background: var(--correct); border-color: var(--correct); color: #000; transform: scale(1.05);}
+        .agree-container.locked .agree-btn:not(.selected) { opacity: 0.3; pointer-events: none; filter: grayscale(100%);}
+
+        .arena-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; perspective: 1000px; margin-top: 30px; width: 100%; max-width: 600px; margin-inline: auto;}
+        .arena-card { background: transparent; min-height: 220px; cursor: pointer; width: 100%; display: block; }
+        .arena-card-inner { position: relative; width: 100%; height: 100%; min-height: 220px; text-align: center; transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-style: preserve-3d; }
+        .arena-card.flipped .arena-card-inner { transform: rotateY(180deg); }
+        .arena-card-front, .arena-card-back { position: absolute; top: 0; left: 0; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; }
+        .arena-card-front { background: rgba(15,23,42,0.8); }
+        .arena-card-front i { font-size: 3rem; color: var(--accent); margin-bottom: 15px;}
+        .arena-card-front h3 { font-family: var(--font-display); font-size: 1.4rem; color: #fff; letter-spacing: 1px; margin: 0;}
+        .arena-card-back { background: var(--brand-main); color: #fff; transform: rotateY(180deg); padding: 20px; }
+        .arena-card-back p { color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0; line-height: 1.5; }
+
+        .phone-ui { width: 100%; max-width: 380px; height: 600px; background: #0f172a; border: 12px solid #1e293b; border-radius: 45px; position: relative; margin: 0 auto; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.9); }
+        .phone-notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 100px; height: 25px; background: #1e293b; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; z-index: 20; }
+        .phone-top-bar { height: 80px; background: rgba(15,23,42,0.95); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 15px; font-weight: 800; font-size: 1.1rem; z-index: 10; border-bottom: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(10px); }
+        .phone-chat-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; scrollbar-width: none; background: #0f172a;}
+        .phone-msg { padding: 12px 18px; border-radius: 18px; max-width: 85%; font-size: 1.05rem; line-height: 1.4; animation: popIn 0.3s ease-out forwards; font-weight: 500; text-align: left; }
+        .msg-received { background: #334155; color: #fff; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid rgba(255,255,255,0.05); }
+        .msg-sent { background: var(--brand-main); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; font-weight: 700; display: none;}
+        .msg-sent.visible { display: block; }
+        .phone-options-area { padding: 20px; background: rgba(15,23,42,0.95); border-top: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 10px; z-index: 10; }
+        .phone-opt-btn { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 15px; border-radius: 12px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s; text-align: left; display: block; width: 100%; }
+        .phone-opt-btn:hover { background: rgba(255,255,255,0.05); border-color: var(--brand-main); color: var(--accent); }
+        .typing-indicator { display: flex; gap: 6px; padding: 16px 20px; background: #334155; border-radius: 18px; align-self: flex-start; border-bottom-left-radius: 4px; animation: popIn 0.3s ease-out forwards; display: none;}
+        .typing-indicator.visible { display: flex; }
+        .dot { width: 8px; height: 8px; background: #9ca3af; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
+        .dot:nth-child(1) { animation-delay: -0.32s; } .dot:nth-child(2) { animation-delay: -0.16s; }
+
+        /* Sidebars & Menus */
+        .footer { position: fixed; bottom: 0; left: 0; width: 100%; height: 85px; background: rgba(6, 11, 20, 0.95); backdrop-filter: blur(20px); display: flex; justify-content: space-between; align-items: center; padding: 0 5%; z-index: 150; border-top: 1px solid rgba(255,255,255,0.05); transition: 0.4s; }
+        .nav-btn { background: transparent; border: none; color: #94a3b8; padding: 10px 20px; font-weight: 800; cursor: pointer; transition: 0.3s; font-family: var(--font-code); display: flex; align-items: center; gap: 8px; font-size: 1rem;}
+        .nav-btn:hover:not(:disabled) { color: #fff; }
+        .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .nav-btn.next { background: var(--brand-main); color: #fff; border-radius: 12px; padding: 12px 30px; box-shadow: 0 5px 15px rgba(0, 115, 192, 0.2); border: 1px solid rgba(255,255,255,0.2);}
+        .nav-btn.next:hover:not(:disabled) { background: #005A99; box-shadow: 0 5px 20px rgba(0, 115, 192, 0.5); transform: translateY(-2px);}
+        .nav-btn.next.pulsing { animation: pulseNext 2s infinite; background: #005A99; }
+        .progress-bar { position: fixed; bottom: 85px; left: 0; height: 4px; background: var(--brand-main); transition: width 0.3s ease; z-index: 151; }
+
+        .sidebar-panel { position: fixed; top: 0; right: -500px; width: 450px; max-width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.98); z-index: 2000; padding: 100px 40px 40px; transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1); border-left: 1px solid var(--darkBorder); box-shadow: -20px 0 50px rgba(0,0,0,0.8); backdrop-filter: blur(20px);}
+        .sidebar-panel.right-open { right: 0; }
+        .sidebar-close { position: absolute; top: 20px; left: 20px; background: transparent; border: none; color: var(--textDim); width: 40px; height: 40px; border-radius: 10px; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;}
+        .sidebar-close:hover { color: #fff; background: var(--incorrect); }
+        .sidebar-panel.left { left: -500px; right: auto; border-left: none; border-right: 1px solid var(--darkBorder); box-shadow: 20px 0 50px rgba(0,0,0,0.8); }
+        .sidebar-panel.left.open { left: 0; }
+        .sidebar-panel.left .sidebar-close { left: auto; right: 20px; }
+
+        .dict-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: 0.3s; }
+        .dict-modal.active { display: flex; opacity: 1; }
+        .dict-box { background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255,255,255,0.1); border-top: 4px solid var(--accent); border-radius: 20px; padding: 40px; max-width: 500px; width: 100%; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.8); transform: scale(0.95); transition: 0.3s; }
+        .dict-modal.active .dict-box { transform: scale(1); }
+        .dict-close { position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: var(--textDim); font-size: 1.5rem; cursor: pointer; transition: 0.2s; }
+        .dict-close:hover { color: #fff; }
+
+        .alert-overlay { position: fixed; inset: 0; pointer-events: none; display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; transition: 0.3s; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px);}
+        .alert-text { font-family: var(--font-display); font-size: 5rem; text-transform: uppercase; font-weight: 900; text-shadow: 0 10px 40px rgba(0,0,0,0.8); transform: scale(0.5); transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-align: center; line-height: 1; padding: 30px; background: rgba(0,0,0,0.8); border: 4px solid; border-radius: 20px;}
+        .alert-overlay.show { opacity: 1; }
+        .alert-overlay.show .alert-text { transform: scale(1); }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.8rem; }
+            h2 { font-size: 1.5rem; }
+            .glass-panel { padding: 30px 20px; max-height: 75vh; }
+            .navbar { padding: 0 15px; height: 60px; }
+            .main-container { padding: 90px 3% 90px 3%; }
+        }
+
+        @keyframes popIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes stampDrop { to { opacity: 0.9; transform: translate(-50%, -50%) scale(1) rotate(-15deg); } }
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        @keyframes pulseNext { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; box-shadow: 0 0 20px var(--brand-main); } }
+    </style>
+</head>
+<body>
+
+    <div class="correction-overlay"></div>
+
+    <div class="bg-layer">
+        <div class="bg-image"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <div class="alert-overlay" id="alert-screen"><div class="alert-text" id="alert-msg" style="color: var(--accent); border-color: var(--accent);">GREAT JOB!</div></div>
+    <div class="damage-flash" id="damageFlash"></div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="logo"><i class="fa-solid fa-briefcase"></i> WOLF LABS <span>HR</span></div>
+        <div class="nav-controls">
+            <button class="teacher-tool" onclick="window.toggleSidebar('teacher-hud')" title="Console do RH"><i class="fa-solid fa-sliders"></i></button>
+            <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.1); margin: 0 5px;"></div>
+            <button class="teacher-tool" onclick="window.toggleSidebar('whiteboard')" title="Quadro Branco"><i class="fa-solid fa-pen"></i></button>
+            <button class="teacher-tool" onclick="window.toggleFullscreen()" title="Fullscreen"><i class="fa-solid fa-expand"></i></button>
+        </div>
+    </nav>
+
+    <!-- TEACHER HUD (LEFT) -->
+    <div id="teacher-hud" class="sidebar-panel left">
+        <button class="sidebar-close" onclick="window.toggleSidebar('teacher-hud')"><i class="fa-solid fa-xmark"></i></button>
+        <h2 style="font-size: 1.5rem; justify-content: flex-start; border-b: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 25px; color: #fff; font-family: var(--font-display);">CONSOLE DO RH</h2>
+        
+        <p style="font-family: var(--font-code); color: var(--accent); font-size: 0.8rem; margin-bottom: 10px; letter-spacing: 2px;">TEMPO DA SESSÃO</p>
+        <div id="dmTimer" style="font-family: var(--font-display); font-size: 4.5rem; font-weight: 900; color: #fff; margin-bottom: 15px; text-shadow: 0 0 20px rgba(255,255,255,0.3);">00:60</div>
+        <button class="btn-outline" style="width: 100%; padding: 15px; margin-bottom: 30px; font-size: 1rem; border-color: var(--accent); color: var(--accent);" onclick="window.startTimer()">Iniciar 60s</button>
+        
+        <p style="font-family: var(--font-code); color: var(--accent); font-size: 0.8rem; margin-bottom: 10px; letter-spacing: 2px;">AÇÕES EXECUTIVAS</p>
+        <button class="btn-outline" style="width: 100%; padding: 15px; margin-bottom: 15px; font-size: 1rem; border-color: var(--brand-main); color: var(--brand-main); background: rgba(0,115,192,0.1);" onclick="window.awardStar()"><i class="fa-solid fa-star mr-2"></i> Dar Ponto (+1)</button>
+        <button class="btn-outline" style="width: 100%; padding: 15px; margin-bottom: 30px; font-size: 1rem;" onclick="window.toggleCorrectionMode()"><i class="fa-solid fa-hand-paper mr-2"></i> Modo Correção</button>
+    </div>
+
+    <!-- WHITEBOARD (RIGHT) -->
+    <div id="whiteboard" class="sidebar-panel">
+        <button class="sidebar-close" onclick="window.toggleSidebar('whiteboard')"><i class="fa-solid fa-xmark"></i></button>
+        <h2 style="text-align: left; color: #fff; font-family: var(--font-display); font-size: 1.5rem; justify-content: flex-start; border-b: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px;">QUADRO BRANCO</h2>
+        <textarea style="width: 100%; height: calc(100% - 100px); background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; color: var(--accent); font-family: var(--font-code); font-size: 1.2rem; resize: none; box-shadow: inset 0 0 20px rgba(0,0,0,0.8);" placeholder="// Escreva correções gramaticais ou dicas de vocabulário aqui..."></textarea>
+    </div>
+
+    <!-- SMART DICT MODAL -->
+    <div class="dict-modal" id="dict-modal">
+        <div class="dict-box">
+            <button class="dict-close" onclick="window.closeDict()"><i class="fa-solid fa-times"></i></button>
+            <p style="font-family: var(--font-code); color: var(--accent); font-size: 0.8rem; margin-bottom: 10px; letter-spacing: 2px; text-transform: uppercase;">Glossário Corporativo</p>
+            <h1 id="d-word" style="font-size: 3rem; text-align: left; margin-bottom: 5px; color: var(--brand-main); font-family: var(--font-display); font-weight: 900; text-transform: uppercase; text-shadow: 0 0 20px rgba(0,115,192,0.5);">Word</h1>
+            <span id="d-phonetic" style="font-family: var(--font-code); color: var(--textDim); font-size: 1.2rem; margin-bottom: 20px; display: block;">/phonetic/</span>
+            <p id="d-def" style="font-size: 1.3rem; color: #fff; line-height: 1.5; border-left: 4px solid var(--accent); padding-left: 15px; margin-bottom: 20px; text-align: left;">Definition here.</p>
+            
+            <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05);">
+                <p id="d-context" style="font-style: italic; color: var(--textDim); font-size: 1.1rem; margin: 0; text-align: left;"></p>
+            </div>
+            
+            <div style="background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3); padding: 20px; border-radius: 12px;">
+                <span style="color: var(--accent); font-family: var(--font-code); font-weight: 700; font-size: 0.8rem; display: block; margin-bottom: 8px; text-transform: uppercase;"><i class="fa-solid fa-microphone"></i> Your Turn</span>
+                <p id="d-speak" style="color: #fff; font-size: 1.2rem; font-weight: 600; margin: 0; text-align: left;"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN SLIDES CONTAINER (28 SLIDES) -->
+    <main class="main-container" id="slides-container">
+
+        <!-- 1. ADMIN PROTOCOL (Teacher's Guide) -->
+        <div class="slide active">
+            <div class="glass-panel text-left w-full">
+                <h2 style="color: #fff; margin-bottom: 15px; justify-content: flex-start;"><i class="fa-solid fa-chalkboard-user" style="color: var(--brand-main);"></i> GUIA DO PROFESSOR (TG)</h2>
+                <div style="background: rgba(0,0,0,0.4); border-radius: 15px; padding: 20px; margin: 10px 0; border-left: 4px solid var(--brand-main); width: 100%;">
+                    <p style="font-weight: 800; color: var(--brand-main); margin-bottom: 15px; font-size: 1.2rem;">OBJETIVO: Radical Candor & Feedback (B1/B2)</p>
+                    <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; font-size: 1.1rem; line-height: 1.5;">
+                        <i class="fa-solid fa-check" style="color: var(--brand-main); margin-top: 4px;"></i> 
+                        <span><strong>Foco Gramatical:</strong> Modals of Advice (Should/Ought to) e Modals of Obligation (Must/Have to). Essencial para dar feedback no ambiente corporativo.</span>
+                    </div>
+                    <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; font-size: 1.1rem; line-height: 1.5;">
+                        <i class="fa-solid fa-check" style="color: var(--brand-main); margin-top: 4px;"></i> 
+                        <span><strong>A Vibe:</strong> Consultoria Corporativa. A aula explora como os líderes devem importar-se pessoalmente, mas desafiar diretamente.</span>
+                    </div>
+                    <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; font-size: 1.1rem; line-height: 1.5;">
+                        <i class="fa-solid fa-check" style="color: var(--brand-main); margin-top: 4px;"></i> 
+                        <span><strong>Vídeo (Long Chunks):</strong> Os blocos de vídeo têm ~2 minutos. Eles introduzem os eixos de empatia e os perigos do feedback mal dado.</span>
+                    </div>
+                    <div style="display: flex; align-items: flex-start; gap: 12px; font-size: 1.1rem; line-height: 1.5;">
+                        <i class="fa-solid fa-check" style="color: var(--accent); margin-top: 4px;"></i> 
+                        <span><strong>Dica Wolf Labs:</strong> Os alunos adoram reclamar de chefes! Use os slides de Roleplay e Stand Your Ground para os fazer falar o máximo possível.</span>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 30px; width: 100%;">
+                    <button class="btn-gold" onclick="window.nextSlide()">INICIAR PROTOCOLO</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. COVER -->
+        <div class="slide">
+            <div class="glass-panel" style="text-align: center; border: none; background: transparent; box-shadow: none;">
+                <div style="font-size: 8rem; color: var(--accent); filter: drop-shadow(0 0 40px rgba(212,175,55,0.6)); animation: pulseNext 3s infinite; margin-bottom: 20px;">
+                    <i class="fa-solid fa-comments"></i>
+                </div>
+                <h1 style="font-size: 4.5rem; letter-spacing: -2px; text-transform: uppercase; margin-bottom: 10px; text-shadow: 0 10px 30px rgba(0,0,0,0.8); line-height: 1.1;">
+                    THE ART OF<br><span style="color: var(--brand-main); text-shadow: 0 0 30px rgba(0,115,192,0.8);">FEEDBACK</span>
+                </h1>
+                <p style="font-size: 1.5rem; letter-spacing: 6px; color: var(--accent); font-weight: 800; margin-bottom: 40px; font-family: var(--font-code); text-shadow: 0 2px 10px rgba(0,0,0,0.8);">B1 / B2 LEVEL</p>
+                
+                <input type="text" id="s-name" class="input-name" placeholder="Enter Executive Name..." onkeypress="if(event.key==='Enter') window.saveNameAndStart()">
+                <button class="btn-gold" style="font-size: 1.4rem; padding: 20px 50px;" onclick="window.saveNameAndStart()">ENTER BOARDROOM <i class="fa-solid fa-briefcase ml-2"></i></button>
+            </div>
+        </div>
+
+        <!-- 3. ICEBREAKER -->
+        <div class="slide" data-hub="true">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-handshake"></i> VIBE CHECK</h2>
+                <p style="font-size: 1.8rem; margin-bottom: 40px; color: #fff; font-weight: 500; text-align: center;">Welcome to the boardroom, <span class="dyn-name text-accent font-bold uppercase">EXECUTIVE</span>. How do you feel about giving feedback?</p>
+                
+                <div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px;">
+                    <button class="btn-outline" style="border-color: var(--brand-main); font-size: 1.2rem; padding: 20px 40px;" onclick="window.genericCorrect('hub-ice')">I FEEL NERVOUS</button>
+                    <button class="btn-outline" style="border-color: var(--accent); font-size: 1.2rem; padding: 20px 40px;" onclick="window.genericCorrect('hub-ice')">I FEEL CONFIDENT</button>
+                </div>
+
+                <div class="speaking-hub" id="hub-ice">
+                    <p><strong>Consultant's Notes:</strong> Ask them WHY. Is it hard to tell people they made a mistake?</p>
+                    <button class="starter-reveal-btn" onclick="window.revealStarter(this)"><i class="fa-solid fa-lightbulb"></i> Show Speaking Starter</button>
+                    <div class="starter-content">
+                        <span class="starter-phrase">"Giving feedback makes me feel... because..."</span>
+                    </div>
+                    <button class="btn-gold" style="margin-top: 20px; font-size: 1rem; padding: 12px 30px;" onclick="window.nextSlide()">NEXT PHASE</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. EXECUTIVE DEBATE (Replaced Topic Cards) -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-comments"></i> EXECUTIVE DEBATE</h2>
+                <p>Select a topic to discuss your corporate experience.</p>
+                
+                <div class="flex flex-col md:flex-row gap-6 w-full max-w-4xl mx-auto mt-6">
+                    <div class="flex-1 bg-[rgba(0,0,0,0.5)] border border-[rgba(255,255,255,0.1)] p-8 rounded-2xl hover:border-brand-main transition cursor-pointer group shadow-lg text-center" onclick="window.genericCorrect('hub-debate1')">
+                        <i class="fa-solid fa-thumbs-up text-4xl text-accent mb-4 group-hover:scale-110 transition"></i>
+                        <h3 class="text-xl font-bold text-white mb-4">Topic 1</h3>
+                        <p class="text-slate-300">Do you prefer receiving positive feedback or constructive criticism?</p>
+                    </div>
+                    <div class="flex-1 bg-[rgba(0,0,0,0.5)] border border-[rgba(255,255,255,0.1)] p-8 rounded-2xl hover:border-brand-main transition cursor-pointer group shadow-lg text-center" onclick="window.genericCorrect('hub-debate1')">
+                        <i class="fa-solid fa-user-tie text-4xl text-accent mb-4 group-hover:scale-110 transition"></i>
+                        <h3 class="text-xl font-bold text-white mb-4">Topic 2</h3>
+                        <p class="text-slate-300">Have you ever had a boss who was rude or aggressive?</p>
+                    </div>
+                </div>
+                
+                <div class="speaking-hub w-full max-w-4xl mx-auto" id="hub-debate1">
+                    <p><strong>Consultant's Notes:</strong> Push for elaboration. Ask for real examples from their career.</p>
+                    <button class="starter-reveal-btn" onclick="window.revealStarter(this)"><i class="fa-solid fa-lightbulb"></i> Show Speaking Starter</button>
+                    <div class="starter-content">
+                        <span class="starter-phrase">"In my experience..."</span>
+                    </div>
+                    <button class="btn-gold" style="margin-top: 20px; font-size: 1rem; padding: 12px 30px;" onclick="window.nextSlide()">NEXT PHASE</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. VOCAB 1 (Boxes) -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-book-open"></i> HR LEXICON 1</h2>
+                <p>Click the boxes to reveal the essential corporate vocabulary.</p>
+                <div class="ww-grid">
+                    <div class="ww-box" onclick="window.openBox(this, 'Candor', 'btn-v1')">
+                        <i class="fa-solid fa-bullseye"></i>
+                        <span style="font-family: var(--font-code); color: var(--textDim); font-size: 1.1rem; font-weight: bold;">Candor</span>
+                    </div>
+                    <div class="ww-box" onclick="window.openBox(this, 'Empathy', 'btn-v1')">
+                        <i class="fa-solid fa-heart"></i>
+                        <span style="font-family: var(--font-code); color: var(--textDim); font-size: 1.1rem; font-weight: bold;">Empathy</span>
+                    </div>
+                    <div class="ww-box" onclick="window.openBox(this, 'Feedback', 'btn-v1')">
+                        <i class="fa-solid fa-comment-dots"></i>
+                        <span style="font-family: var(--font-code); color: var(--textDim); font-size: 1.1rem; font-weight: bold;">Feedback</span>
+                    </div>
+                </div>
+                <button class="btn-gold" style="margin-top: 40px; display: none;" id="btn-v1" onclick="window.nextSlide()">PROCEED</button>
+            </div>
+        </div>
+
+        <!-- 6. VOCAB 2 (Boxes) -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-book-open"></i> HR LEXICON 2</h2>
+                <p>Click to decode the negative behaviors in management.</p>
+                <div class="ww-grid">
+                    <div class="ww-box" onclick="window.openBox(this, 'Ruinous', 'btn-v2')">
+                        <i class="fa-solid fa-house-crack"></i>
+                        <span style="font-family: var(--font-code); color: var(--textDim); font-size: 1.1rem; font-weight: bold;">Ruinous</span>
+                    </div>
+                    <div class="ww-box" onclick="window.openBox(this, 'Obnoxious', 'btn-v2')">
+                        <i class="fa-solid fa-face-angry"></i>
+                        <span style="font-family: var(--font-code); color: var(--textDim); font-size: 1.1rem; font-weight: bold;">Obnoxious</span>
+                    </div>
+                    <div class="ww-box" onclick="window.openBox(this, 'Praise', 'btn-v2')">
+                        <i class="fa-solid fa-hands-clapping"></i>
+                        <span style="font-family: var(--font-code); color: var(--textDim); font-size: 1.1rem; font-weight: bold;">Praise</span>
+                    </div>
+                </div>
+                <button class="btn-gold" style="margin-top: 40px; display: none;" id="btn-v2" onclick="window.nextSlide()">ACCESS VIDEO</button>
+            </div>
+        </div>
+
+        <!-- 7. VIDEO CHUNK 1 (0:00 - 2:15) -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-brands fa-youtube text-red-500"></i> ROUND 1: THE AXES</h2>
+                <p>Watch from 0:00 to 2:15. What are the two main axes of Radical Candor?</p>
+                <div class="video-wrapper">
+                    <iframe data-src="https://www.youtube-nocookie.com/embed/vmxHUiiHgNk?start=0&end=135&rel=0&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                </div>
+                <button class="btn-gold" onclick="window.nextSlide()">I FINISHED WATCHING</button>
+            </div>
+        </div>
+
+        <!-- 8. COMPREHENSION MCQ -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-check-double"></i> EXECUTIVE SUMMARY</h2>
+                <p style="font-size: 1.5rem; color: #fff; font-weight: 600; margin-bottom: 30px; text-align: center;">What does "Care Personally" mean in the context of Radical Candor?</p>
+                
+                <div class="flex flex-col gap-4 w-full max-w-3xl mx-auto" id="mcq-group1">
+                    <button class="mcq-btn" onclick="window.checkMCQ(this, true, 'hub-mcq1')"><i class="fa-regular fa-circle"></i> Showing that you genuinely care about the person as a human being.</button>
+                    <button class="mcq-btn" onclick="window.checkMCQ(this, false, 'hub-mcq1')"><i class="fa-regular fa-circle"></i> Buying them gifts and never criticizing their work.</button>
+                    <button class="mcq-btn" onclick="window.checkMCQ(this, false, 'hub-mcq1')"><i class="fa-regular fa-circle"></i> Being professional and ignoring their personal feelings.</button>
+                </div>
+                
+                <div class="speaking-hub" id="hub-mcq1" style="max-width: 3xl;">
+                    <p><strong>Consultant's Notes:</strong> "Exactly! You have to care personally but also challenge them directly. Is it hard to do both?"</p>
+                    <button class="btn-gold" style="margin-top: 15px; font-size: 0.9rem; padding: 12px 25px;" onclick="window.nextSlide()">NEXT PHASE</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9. GRAMMAR BLUEPRINT 1 -->
+        <div class="slide">
+            <div class="glass-panel text-left items-start">
+                <h2 class="w-full mb-2 justify-start"><i class="fa-solid fa-book-atlas"></i> STRATEGY FRAMEWORK 1</h2>
+                <p class="w-full text-left mb-8 font-code uppercase tracking-widest text-sm text-accent font-bold">Grammar: Modals of Advice</p>
+                
+                <div class="grid md:grid-cols-2 gap-6 w-full" style="display: grid; grid-template-columns: 1fr; gap: 20px; width: 100%; max-width: 800px; margin: 0 auto;">
+                    <div style="background: rgba(0,0,0,0.4); padding: 35px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); border-left: 6px solid var(--accent);">
+                        <h3 style="color: var(--accent); font-weight: 900; font-size: 1.5rem; margin-bottom: 15px; font-family: var(--font-display);">GIVING ADVICE (SOFT)</h3>
+                        <p style="font-size: 1.2rem; color: var(--textDim); margin-bottom: 20px; line-height: 1.5;">Use <strong style="color: #fff;">SHOULD</strong> or <strong style="color: #fff;">OUGHT TO</strong> to suggest a good idea. It is not an obligation.</p>
+                        <div style="background: rgba(0,0,0,0.6); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                            <p style="color: #fff; margin:0; font-size:1.2rem; text-align:left;">"You <span style="color: var(--accent); font-weight: bold;">should praise</span> your team publicly."</p>
+                            <br>
+                            <p style="color: #fff; margin:0; font-size:1.2rem; text-align:left;">"He <span style="color: var(--accent); font-weight: bold;">shouldn't criticize</span> people aggressively."</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full flex justify-center mt-10" style="display: flex; justify-content: center; width: 100%; margin-top: 40px;">
+                    <button class="btn-gold" onclick="window.nextSlide()">INITIATE PRACTICE</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 10. GRAMMAR SANDBOX -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-sliders"></i> DYNAMIC MODELING</h2>
+                <p>Toggle the option to see the grammar structure change.</p>
+                
+                <div class="grammar-switch">
+                    <button class="switch-btn active" style="background:var(--brand-main); color:#fff; border-color:var(--brand-main);" onclick="window.switchSand(this, 'You SHOULD BE honest with your team.', 'Advice: Positive')">Should</button>
+                    <button class="switch-btn" onclick="window.switchSand(this, 'You SHOULDN\'T BE obnoxious.', 'Advice: Negative')">Shouldn't</button>
+                    <button class="switch-btn" onclick="window.switchSand(this, 'We OUGHT TO CARE personally.', 'Advice: Formal')">Ought to</button>
+                </div>
+                
+                <div class="sandbox-display">
+                    <p id="sand-label" style="color: var(--accent); font-family: var(--font-code); font-weight: bold; font-size: 1rem; letter-spacing: 2px; margin-bottom: 20px; text-transform: uppercase;">Advice: Positive</p>
+                    <p id="sand-text" style="font-size: 2.5rem; font-weight: bold; color: #fff; line-height: 1.5; margin: 0;">You <span style="color: var(--brand-main);">SHOULD BE</span> honest with your team.</p>
+                </div>
+                <button class="btn-gold" style="margin-top: 40px;" onclick="window.nextSlide()">ACKNOWLEDGE</button>
+            </div>
+        </div>
+
+        <!-- 11. THE HR DILEMMA (Replaced The Lineup) -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-scale-unbalanced"></i> THE HR DILEMMA</h2>
+                <p>Read the scenario and choose the best management approach.</p>
+                
+                <div style="background: rgba(0,0,0,0.5); padding: 25px; border-radius: 15px; border: 1px dashed var(--accent); font-size: 1.3rem; margin-bottom: 30px; width: 100%; max-width: 800px; text-align: center; color: #fff;">
+                    "An employee is very nice and tries hard, but constantly makes mistakes that hurt the team's performance. What do you do?"
+                </div>
+
+                <div class="flex flex-col gap-4 w-full max-w-4xl mx-auto" id="dilemma-group">
+                    <button class="mcq-btn" onclick="window.checkMCQ(this, false, 'hub-mcq2')"><i class="fa-regular fa-circle"></i> A) Ignore it to spare their feelings and fix the mistakes yourself.</button>
+                    <button class="mcq-btn" onclick="window.checkMCQ(this, false, 'hub-mcq2')"><i class="fa-regular fa-circle"></i> B) Tell them their work is terrible in front of the whole team.</button>
+                    <button class="mcq-btn" onclick="window.checkMCQ(this, true, 'hub-mcq2')"><i class="fa-regular fa-circle"></i> C) Have a private, honest conversation to help them grow.</button>
+                </div>
+
+                <div class="speaking-hub w-full max-w-4xl mx-auto" id="hub-mcq2">
+                    <p><strong>Consultant's Notes:</strong> "Exactly! Option C is Radical Candor. Option A is Ruinous Empathy. Have you ever had to fire someone?"</p>
+                    <button class="btn-gold" style="margin-top: 15px; font-size: 0.9rem; padding: 12px 25px;" onclick="window.nextSlide()">NEXT</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 12. VIDEO CHUNK 2 (2:15 - 4:30) -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-brands fa-youtube text-red-500"></i> ROUND 2: THE DANGERS</h2>
+                <p>Watch from 2:15 to 4:30. What is "Obnoxious Aggression" and "Ruinous Empathy"?</p>
+                <div class="video-wrapper">
+                    <iframe data-src="https://www.youtube-nocookie.com/embed/vmxHUiiHgNk?start=135&end=270&rel=0&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                </div>
+                <button class="btn-gold" onclick="window.nextSlide()">ANALYSIS COMPLETE</button>
+            </div>
+        </div>
+
+        <!-- 13. FACT CHECKER -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-clipboard-check"></i> FACT CHECKER</h2>
+                <p>Verify the data based on the video footage.</p>
+                
+                <div class="fact-checker-card" id="fc-box">
+                    <div class="fact-statement">"According to Kim Scott, Ruinous Empathy is much better than Obnoxious Aggression because at least you are being nice."</div>
+                    <div class="fact-stamp-area">
+                        <button class="stamp-btn verified" onclick="window.checkFact(this, false, 'box')">VERIFIED</button>
+                        <button class="stamp-btn fake" onclick="window.checkFact(this, true, 'box')">FAKE NEWS</button>
+                    </div>
+                    <div class="stamp-mark" id="fc-stamp">VERIFIED</div>
+                </div>
+
+                <div class="speaking-hub" id="hub-fc">
+                    <p><strong>Consultant's Notes:</strong> "Fake News! She actually says Obnoxious Aggression is better, because at least the person knows where they stand! Surprising, right?"</p>
+                    <button class="btn-gold" style="margin-top: 15px; font-size: 0.9rem; padding: 12px 25px;" onclick="window.nextSlide()">NEXT PHASE</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 14. THE SORTER -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-boxes-packing"></i> THE SORTER</h2>
+                <p>Read the feedback. Is it Radical Candor or Ruinous Empathy?</p>
+                
+                <div class="scale-container" style="max-width: 900px;">
+                    <div class="scale-display" id="classifier-display" style="border-color: var(--brand-main); color: var(--brand-main); font-size: 1.5rem; text-transform: none;">"I noticed a mistake in your report. Let's fix it together so you can improve."</div>
+                    <div class="scale-controls" style="margin-top: 10px;">
+                        <button class="scale-btn" onclick="window.classifyItem('CANDOR')">RADICAL CANDOR</button>
+                        <button class="scale-btn" onclick="window.classifyItem('RUINOUS')">RUINOUS EMPATHY</button>
+                    </div>
+                </div>
+
+                <div class="speaking-hub" id="hub-classifier" style="margin-top: 30px;">
+                    <p><strong>Consultant's Notes:</strong> "Perfect sorting! Now let's learn how to express obligation and rules."</p>
+                    <button class="btn-gold" style="margin-top: 15px; font-size: 0.9rem; padding: 12px 25px;" onclick="window.nextSlide()">NEXT PHASE</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 15. GRAMMAR BLUEPRINT 2 -->
+        <div class="slide">
+            <div class="glass-panel text-left items-start">
+                <h2 class="w-full mb-2 justify-start"><i class="fa-solid fa-book-atlas"></i> STRATEGY FRAMEWORK 2</h2>
+                <p class="w-full text-left mb-8 font-code uppercase tracking-widest text-xs text-accent font-bold">Grammar: Modals of Obligation</p>
+                
+                <div class="grid md:grid-cols-2 gap-6 w-full" style="display: grid; grid-template-columns: 1fr; gap: 20px; width: 100%; max-width: 800px; margin: 0 auto;">
+                    <div style="background: rgba(0,0,0,0.4); padding: 35px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); border-left: 6px solid var(--brand-main);">
+                        <h3 style="color: var(--brand-main); font-weight: 900; font-size: 1.5rem; margin-bottom: 15px; font-family: var(--font-display);">STRONG OBLIGATION</h3>
+                        <p style="font-size: 1.2rem; color: var(--textDim); margin-bottom: 20px; line-height: 1.5;">Use <strong style="color: #fff;">MUST</strong> or <strong style="color: #fff;">HAVE TO</strong> when something is necessary or required.</p>
+                        <div style="background: rgba(0,0,0,0.6); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                            <p style="color: #fff; margin:0; font-size:1.2rem; text-align:left;">"A manager <span style="color: var(--brand-main); font-weight: bold;">must care</span> personally."</p>
+                            <br>
+                            <p style="color: #fff; margin:0; font-size:1.2rem; text-align:left;">"We <span style="color: var(--brand-main); font-weight: bold;">have to give</span> honest feedback."</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full flex justify-center mt-10" style="display: flex; justify-content: center; width: 100%; margin-top: 40px;">
+                    <button class="btn-gold" onclick="window.nextSlide()">INITIATE PRACTICE</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 16. GRAMMAR SANDBOX 2 -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-sliders"></i> DYNAMIC MODELING 2</h2>
+                <p>Toggle the option to see the grammar structure change.</p>
+                
+                <div class="grammar-switch">
+                    <button class="switch-btn active" style="background:var(--brand-main); color:#fff; border-color:var(--brand-main);" onclick="window.switchSand2(this, 'You MUST tell the truth.', 'Obligation')">Must</button>
+                    <button class="switch-btn" onclick="window.switchSand2(this, 'You DON\'T HAVE TO be mean.', 'No Obligation (Optional)')">Don't have to</button>
+                    <button class="switch-btn" onclick="window.switchSand2(this, 'You MUSTN\'T shout at employees.', 'Prohibition (Rule)')">Mustn't</button>
+                </div>
+                
+                <div class="sandbox-display">
+                    <p id="sand2-label" style="color: var(--accent); font-family: var(--font-code); font-weight: bold; font-size: 1rem; letter-spacing: 2px; margin-bottom: 20px; text-transform: uppercase;">Obligation</p>
+                    <p id="sand2-text" style="font-size: 2.5rem; font-weight: bold; color: #fff; line-height: 1.5; margin: 0;">You <span style="color: var(--brand-main);">MUST</span> tell the truth.</p>
+                </div>
+                <button class="btn-gold" style="margin-top: 40px;" onclick="window.nextSlide()">ACKNOWLEDGE</button>
+            </div>
+        </div>
+
+        <!-- 17. SYNTAX BUILDER -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-wrench"></i> SYNTAX ASSEMBLY</h2>
+                <p>Click the words to build a correct corporate rule.</p>
+                
+                <div id="dropZone" class="drop-zone"></div>
+                
+                <div class="ww-grid" id="wordBank" style="gap: 15px;">
+                    <span class="word-chip" onclick="window.moveWord(this, 'dropZone', 'We,must,challenge,directly,and,care,personally.')">care</span>
+                    <span class="word-chip" onclick="window.moveWord(this, 'dropZone', 'We,must,challenge,directly,and,care,personally.')">personally.</span>
+                    <span class="word-chip" onclick="window.moveWord(this, 'dropZone', 'We,must,challenge,directly,and,care,personally.')">must</span>
+                    <span class="word-chip" onclick="window.moveWord(this, 'dropZone', 'We,must,challenge,directly,and,care,personally.')">We</span>
+                    <span class="word-chip" onclick="window.moveWord(this, 'dropZone', 'We,must,challenge,directly,and,care,personally.')">challenge</span>
+                    <span class="word-chip" onclick="window.moveWord(this, 'dropZone', 'We,must,challenge,directly,and,care,personally.')">directly</span>
+                    <span class="word-chip" onclick="window.moveWord(this, 'dropZone', 'We,must,challenge,directly,and,care,personally.')">and</span>
+                </div>
+
+                <div class="speaking-hub" id="hub-syn1">
+                    <p><strong>Consultant's Notes:</strong> "Perfect structure! Read the golden rule of Radical Candor out loud."</p>
+                    <button class="btn-gold" style="margin-top: 15px; font-size: 0.9rem; padding: 12px 25px;" onclick="window.nextSlide()">NEXT ROUND</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 18. VIDEO CHUNK 3 (4:30 - End) -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-brands fa-youtube text-red-500"></i> ROUND 3: THE SOLUTION</h2>
+                <p>Watch from 4:30 to 6:30. What is the story about the dog?</p>
+                <div class="video-wrapper">
+                    <iframe data-src="https://www.youtube-nocookie.com/embed/vmxHUiiHgNk?start=270&end=390&rel=0&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                </div>
+                <button class="btn-gold" onclick="window.nextSlide()">ANALYSIS COMPLETE</button>
+            </div>
+        </div>
+
+        <!-- 19. ERROR ISOLATION -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-bug"></i> ERROR ISOLATION</h2>
+                <p>Find and click the <strong style="color: var(--incorrect);">1 mistake</strong> in the sentence to fix it.</p>
+                
+                <div class="flex flex-wrap justify-center gap-3 text-3xl font-bold bg-[rgba(0,0,0,0.5)] p-8 rounded-2xl border border-[rgba(255,255,255,0.1)] shadow-lg" id="mistake-container">
+                    <span class="px-4 py-2 rounded-xl cursor-pointer hover:bg-white/10 transition text-white" onclick="window.checkMistakeMega(this, false, '')">To</span>
+                    <span class="px-4 py-2 rounded-xl cursor-pointer hover:bg-white/10 transition text-white" onclick="window.checkMistakeMega(this, false, '')">be</span>
+                    <span class="px-4 py-2 rounded-xl cursor-pointer hover:bg-white/10 transition text-white" onclick="window.checkMistakeMega(this, false, '')">a</span>
+                    <span class="px-4 py-2 rounded-xl cursor-pointer hover:bg-white/10 transition text-white" onclick="window.checkMistakeMega(this, false, '')">good</span>
+                    <span class="px-4 py-2 rounded-xl cursor-pointer hover:bg-white/10 transition text-white" onclick="window.checkMistakeMega(this, false, '')">manager,</span>
+                    <span class="px-4 py-2 rounded-xl cursor-pointer hover:bg-white/10 transition text-white" onclick="window.checkMistakeMega(this, false, '')">you</span>
+                    <span class="px-4 py-2 rounded-xl cursor-pointer hover:bg-brand/40 border-[3px] border-transparent hover:border-brand transition text-white" onclick="window.checkMistakeMega(this, true, 'mustn\'t')">don't must</span>
+                    <span class="px-4 py-2 rounded-xl cursor-pointer hover:bg-white/10 transition text-white" onclick="window.checkMistakeMega(this, false, '')">shout.</span>
+                </div>
+
+                <div class="speaking-hub" id="hub-mistake">
+                    <p><strong>Consultant's Notes:</strong> "Fixed! We use 'mustn't' for rules (prohibition) and 'don't have to' when it's optional."</p>
+                    <button class="btn-gold" style="margin-top: 15px; font-size: 0.9rem; padding: 12px 25px;" onclick="window.nextSlide()">NEXT ROUND</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 20. DATA RECOVERY (Dropdown) -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-hard-drive"></i> DATA RECOVERY</h2>
+                <p>Restore the HR file about the feedback quadrants.</p>
+                
+                <div class="bg-[rgba(0,0,0,0.6)] border border-[rgba(255,255,255,0.1)] p-8 rounded-2xl w-full max-w-4xl text-xl leading-loose text-slate-200 text-left mb-10">
+                    "If you challenge directly but don't care personally, that is 
+                    <select id="rec-1" class="bg-[#1e293b] text-white border border-[#334155] rounded-lg px-2 py-1 outline-none focus:border-brand cursor-pointer inline-block mx-1 shadow-lg transition">
+                        <option value="">[ ? ]</option>
+                        <option value="Radical Candor">Radical Candor</option>
+                        <option value="Obnoxious Aggression">Obnoxious Aggression</option>
+                    </select>. 
+                    <br><br>
+                    If you care personally but don't challenge, it is 
+                    <select id="rec-2" class="bg-[#1e293b] text-white border border-[#334155] rounded-lg px-2 py-1 outline-none focus:border-brand cursor-pointer inline-block mx-1 shadow-lg transition">
+                        <option value="">[ ? ]</option>
+                        <option value="Ruinous Empathy">Ruinous Empathy</option>
+                        <option value="Manipulative Insincerity">Manipulative Insincerity</option>
+                    </select>. 
+                    You 
+                    <select id="rec-3" class="bg-[#1e293b] text-white border border-[#334155] rounded-lg px-2 py-1 outline-none focus:border-brand cursor-pointer inline-block mx-1 shadow-lg transition">
+                        <option value="">[ ? ]</option>
+                        <option value="should">should</option>
+                        <option value="shouldn't">shouldn't</option>
+                    </select> avoid telling the truth just to be nice."
+                </div>
+                
+                <button class="btn-gold text-xl px-10 py-4" onclick="window.checkRecoveryMega()" id="rec-btn">RESTORE FILE</button>
+
+                <div class="speaking-hub" id="hub-recovery">
+                    <p><strong>Consultant's Notes:</strong> "File restored. Read the paragraph out loud to lock in the vocabulary!"</p>
+                    <button class="btn-gold" style="margin-top: 15px; font-size: 0.9rem; padding: 12px 25px;" onclick="window.nextSlide()">NEXT ROUND</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 21. STAND YOUR GROUND -->
+        <div class="slide">
+            <div class="glass-panel text-center w-full">
+                <h2 class="text-4xl font-display font-black text-brand mb-6 drop-shadow-lg"><i class="fa-solid fa-balance-scale"></i> STAND YOUR GROUND</h2>
+                <p class="text-2xl text-white font-bold mb-10">Evaluate the following corporate statement.</p>
+                
+                <div class="bg-black/60 p-12 rounded-3xl border-2 border-dashed border-accent text-3xl font-black mb-12 max-w-5xl mx-auto shadow-inner text-white leading-relaxed">
+                    "It is better to be a jerk (Obnoxious) than to be fake and nice (Ruinous Empathy)."
+                </div>
+                
+                <div class="agree-container" id="agree-box">
+                    <button class="agree-btn disagree" onclick="window.selectAgree(this, 'disagree')">DISAGREE</button>
+                    <button class="agree-btn neutral" onclick="window.selectAgree(this, 'neutral')">NEUTRAL</button>
+                    <button class="agree-btn agree" onclick="window.selectAgree(this, 'agree')">AGREE</button>
+                </div>
+                
+                <div class="speaking-hub" id="hub-agree">
+                    <p><strong>Consultant's Notes:</strong> "Kim Scott actually agrees! She says Obnoxious Aggression is the second best option. Do you agree?"</p>
+                    <button class="btn-gold mt-6" onclick="window.nextSlide()">NEXT</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 22. CRISIS MANAGEMENT (Texting) -->
+        <div class="slide">
+            <div class="glass-panel text-center w-full">
+                <h2 class="text-4xl font-display font-black text-brand mb-6 drop-shadow-lg"><i class="fa-brands fa-whatsapp text-emerald-400"></i> CRISIS MANAGEMENT</h2>
+                <p class="text-2xl text-white font-bold mb-10">A colleague is upset after a feedback session. Advise them.</p>
+                
+                <div class="phone-ui mx-auto shadow-[0_30px_60px_rgba(0,0,0,0.9)] border-[12px] border-slate-800 h-[650px]">
+                    <div class="phone-notch"></div>
+                    <div class="bg-slate-900 p-5 pt-10 border-b border-slate-700 font-bold text-center text-xl text-white">Colleague 🏢</div>
+                    <div class="flex-1 p-5 overflow-y-auto flex flex-col gap-4" id="chat-area">
+                        <div class="msg-received phone-msg">The boss just told me my project was terrible in front of everyone.</div>
+                        <div class="msg-received phone-msg">I'm so angry. What should I do?</div>
+                        <div class="typing-indicator" id="typing-dot"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                    </div>
+                    <div class="bg-black p-5 border-t border-slate-800 flex flex-col gap-3" id="chat-opts">
+                        <button class="bg-slate-800 border border-slate-600 p-4 rounded-2xl text-left text-white font-bold hover:bg-brand hover:border-white transition shadow-md" onclick="window.advanceChat(false)">You don't have to talk to him. He must apologize first.</button>
+                        <button class="bg-slate-800 border border-slate-600 p-4 rounded-2xl text-left text-white font-bold hover:bg-brand hover:border-white transition shadow-md" onclick="window.advanceChat(true)">You should talk to him privately. He was being obnoxious.</button>
+                    </div>
+                </div>
+                
+                <div class="speaking-hub" id="hub-chat">
+                    <p class="text-xl text-white font-medium"><strong>Consultant's Notes:</strong> "Praise in public, criticize in private! The boss was wrong to do it in front of everyone."</p>
+                    <button class="btn-gold mt-6" onclick="window.nextSlide()">NEXT</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 23. LIE DETECTOR -->
+        <div class="slide">
+            <div class="glass-panel text-center w-full">
+                <h2 class="text-4xl font-display font-black text-brand mb-6 drop-shadow-lg"><i class="fa-solid fa-heart-pulse"></i> THE LIE DETECTOR</h2>
+                <p class="text-2xl text-white font-bold mb-10">Tell the teacher 3 facts about your feedback style. 2 are TRUE, 1 is a LIE!</p>
+                
+                <div class="bg-black/60 border-2 border-brand p-10 rounded-3xl max-w-3xl mx-auto text-left mb-10 text-2xl space-y-6 font-code text-white shadow-[0_0_30px_rgba(0,115,192,0.3)]">
+                    <p class="font-bold"><span class="text-brand">1.</span> When someone gives me bad feedback, I...</p>
+                    <p class="font-bold"><span class="text-brand">2.</span> I find it very difficult to...</p>
+                    <p class="font-bold"><span class="text-brand">3.</span> I have never...</p>
+                </div>
+
+                <div class="speaking-hub" style="display:block;">
+                    <p class="text-xl text-white font-medium"><strong>Consultant's Notes:</strong> Play along! Guess which one is the lie. Then, tell 3 facts about yourself and let the student guess.</p>
+                    <button class="btn-start btn-gold mt-8" onclick="window.nextSlide()">ENTER RPG</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 24. RPG 1 -->
+        <div class="slide" data-hub="true">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-users-viewfinder"></i> THE ARENA: ROLEPLAY</h2>
+                <p>Click the card to reveal your role! You are ready for this.</p>
+                <div class="arena-grid">
+                    <div class="arena-card" onclick="this.classList.toggle('flipped'); document.getElementById('p_20_arena').style.display='block'; window.unlockNextManual();">
+                        <div class="arena-card-inner">
+                            <div class="arena-card-front">
+                                <i class="fa-solid fa-user-tie"></i>
+                                <h3>THE MANAGER</h3>
+                            </div>
+                            <div class="arena-card-back">
+                                <p>An employee is missing deadlines. You must give them Radical Candor. Start the conversation!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="speaking-hub" id="p_20_arena">
+                    <p><strong>Consultant:</strong> Act as the underperforming employee. Make excuses and let the student handle it using "Should" and "Must".</p>
+                    <button class="btn-gold" style="margin-top: 15px; font-size: 0.9rem; padding: 12px 25px;" onclick="window.nextSlide()">NEXT SCENARIO</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 25. RPG 2 -->
+        <div class="slide" data-hub="true">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-shield"></i> THE DEFENSIVE EMPLOYEE</h2>
+                <p>Click the card for scenario 2.</p>
+                <div class="arena-grid">
+                    <div class="arena-card" onclick="this.classList.toggle('flipped'); document.getElementById('p_21_arena').style.display='block'; window.unlockNextManual();">
+                        <div class="arena-card-inner">
+                            <div class="arena-card-front">
+                                <i class="fa-solid fa-comments"></i>
+                                <h3>THE MANAGER</h3>
+                            </div>
+                            <div class="arena-card-back">
+                                <p>You give feedback, but the employee gets angry and says: "You are being too harsh!" Respond using Radical Candor.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="speaking-hub" id="p_21_arena">
+                    <p><strong>Consultant:</strong> Act as the angry employee. The student needs to show they "Care Personally" to calm you down.</p>
+                    <button class="btn-gold" style="margin-top: 15px; font-size: 0.9rem; padding: 12px 25px;" onclick="window.nextSlide()">NEXT SCENARIO</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 26. RPG 3 -->
+        <div class="slide" data-hub="true">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-arrow-up"></i> UPWARD FEEDBACK</h2>
+                <p>Click the card for the final scenario.</p>
+                <div class="arena-grid">
+                    <div class="arena-card" onclick="this.classList.toggle('flipped'); document.getElementById('p_22_arena').style.display='block'; window.unlockNextManual();">
+                        <div class="arena-card-inner">
+                            <div class="arena-card-front">
+                                <i class="fa-solid fa-arrow-trend-up"></i>
+                                <h3>THE EMPLOYEE</h3>
+                            </div>
+                            <div class="arena-card-back">
+                                <p>Your BOSS made a huge mistake in a presentation. You have to tell them. Go!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="speaking-hub" id="p_22_arena">
+                    <p><strong>Consultant:</strong> Act as the Boss. Be a bit arrogant at first, then accept the feedback if it's good.</p>
+                    <button class="btn-gold" style="margin-top: 15px; font-size: 0.9rem; padding: 12px 25px;" onclick="window.nextSlide()">NEXT</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 27. FINAL PITCH -->
+        <div class="slide" data-hub="true">
+            <div class="glass-panel text-center w-full">
+                <h2 class="text-4xl font-display font-black text-brand mb-8 drop-shadow-lg"><i class="fa-solid fa-microphone-lines"></i> THE EXECUTIVE BRIEFING</h2>
+                <p class="text-2xl text-white font-bold mb-10">You have 60 seconds to summarize Radical Candor for a new manager.</p>
+                
+                <div class="bg-black/60 border-2 border-brand p-10 rounded-3xl max-w-3xl mx-auto text-left mb-10 shadow-[0_0_30px_rgba(0,115,192,0.3)]">
+                    <h3 class="text-white font-black text-2xl mb-6 uppercase tracking-widest drop-shadow-md">Checklist:</h3>
+                    <ul class="text-xl text-white font-medium space-y-4">
+                        <li><i class="fa-solid fa-check text-brand mr-3 text-2xl"></i> Explain the two axes (Care Personally, Challenge Directly).</li>
+                        <li><i class="fa-solid fa-check text-brand mr-3 text-2xl"></i> Explain why Ruinous Empathy is dangerous.</li>
+                        <li><i class="fa-solid fa-check text-brand mr-3 text-2xl"></i> Use at least one Modal of Advice (<strong class="text-accent">Should / Ought to</strong>).</li>
+                    </ul>
+                </div>
+                
+                <button class="btn-gold text-2xl px-12 py-5" onclick="document.getElementById('p_23_pitch').style.display='block'; window.startTimer(); window.toggleSidebar('teacher-hud'); window.unlockNextManual();">START BRIEFING</button>
+                
+                <div class="speaking-hub" id="p_23_pitch">
+                    <p class="text-xl text-white font-medium"><strong>Consultant's Notes:</strong> Listen carefully! (The 60s timer has been started).</p>
+                    <button class="btn-gold mt-6" onclick="window.nextSlide()">FINISH SIMULATION</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 28. MISSION COMPLETE -->
+        <div class="slide" data-hub="false">
+            <div class="glass-panel text-center w-full">
+                <i class="fa-solid fa-shield-check text-9xl text-brand mb-10 filter drop-shadow-[0_0_50px_#0073C0] animate-[popIn_0.8s_ease-out]"></i>
+                <h1 class="text-7xl font-display font-black text-brand mb-6 drop-shadow-lg">BOARDROOM SECURED</h1>
+                <p class="text-3xl text-white font-bold mb-12">Exceptional leadership today, <span class="dyn-name text-accent">EXECUTIVE</span>!</p>
+                
+                <div class="bg-black/80 border-4 border-brand/50 p-12 rounded-3xl inline-block shadow-[0_0_40px_rgba(0,115,192,0.3)]">
+                    <p class="text-lg text-brand font-bold uppercase tracking-[0.3em] mb-4">Final XP Score</p>
+                    <p class="text-7xl font-code font-black text-white drop-shadow-[0_0_20px_#0073C0]" id="finalScoreDisplay">0 XP</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER CONTROLS -->
+    <div class="progress-bar" id="progressBar"></div>
+    <div class="footer" id="main-footer">
+        <button class="nav-btn" id="prev-btn" onclick="window.prevSlide()" disabled><i class="fa-solid fa-chevron-left"></i> <span class="hidden md:inline">BACK</span></button>
+        <div style="display: flex; align-items: center; gap: 25px;">
+            <div id="step-id" style="color: white; font-family: var(--font-code); font-size: 1.2rem; letter-spacing: 2px; font-weight: 700;">PAGE <span style="color: var(--brand-main); font-size: 1.4rem;">1</span> / 28</div>
+            <button class="nav-btn next" id="next-btn" onclick="window.nextSlide()" style="display: flex;">NEXT <i class="fa-solid fa-chevron-right" style="margin-left: 5px;"></i></button>
+        </div>
+    </div>
+
+    <script>
+        // === DICTIONARY DATA ===
+        const vocabData = {
+            'candor': { phonetic: '/ˈkæn.dɚ/', def: 'The quality of being open and honest in expression; frankness.', context: 'We need radical candor to improve the team.', speak: 'Are you usually candid with your colleagues?' },
+            'empathy': { phonetic: '/ˈem.pə.θi/', def: 'The ability to understand and share the feelings of another.', context: 'Ruinous empathy happens when you care but don\'t challenge.', speak: 'Is empathy important for a leader?' },
+            'feedback': { phonetic: '/ˈfiːd.bæk/', def: 'Information about reactions to a product or a person\'s performance.', context: 'I need to give you some feedback.', speak: 'Do you like giving feedback?' },
+            'ruinous': { phonetic: '/ˈruː.ɪ.nəs/', def: 'Disastrous or destructive.', context: 'Being too nice can be ruinous.', speak: 'Have you ever experienced ruinous empathy?' },
+            'obnoxious': { phonetic: '/əbˈnɑːk.ʃəs/', def: 'Extremely unpleasant, rude or arrogant.', context: 'Obnoxious aggression is when you challenge but don\'t care.', speak: 'Have you ever had an obnoxious boss?' },
+            'praise': { phonetic: '/preɪz/', def: 'To express admiration or approval.', context: 'You should praise in public.', speak: 'Do you prefer to be praised in public or private?' }
+        };
+
+        let currentSlide = 0;
+        const totalSlides = 28;
+        const slides = document.querySelectorAll('.slide');
+        const nextBtn = document.getElementById('next-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const currentStepEl = document.getElementById('step-id');
+        const progressBar = document.getElementById('progressBar');
+        
+        window.updateSlide = function() {
+            slides.forEach((s, i) => s.classList.toggle('active', i === currentSlide));
+            if(prevBtn) prevBtn.disabled = currentSlide === 0;
+            if(currentSlide === totalSlides - 1) { if(nextBtn) nextBtn.style.display = 'none'; } 
+            else { if(nextBtn) nextBtn.style.display = 'flex'; }
+
+            if(currentStepEl) currentStepEl.innerHTML = `PAGE <span style="color: var(--brand-main); font-size: 1.4rem;">${currentSlide + 1}</span> / ${totalSlides}`;
+            if(progressBar) progressBar.style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+            
+            if(nextBtn) nextBtn.classList.remove('pulsing');
+
+            // Handle Iframes (Stop video when changing slides)
+            slides.forEach((s, i) => {
+                const iframe = s.querySelector('.video-wrapper iframe');
+                if (iframe) {
+                    if (i === currentSlide) {
+                        if (!iframe.src || iframe.src === 'about:blank' || iframe.src === window.location.href) {
+                            iframe.src = iframe.getAttribute('data-src');
+                        }
+                    } else { iframe.src = ''; }
+                }
+            });
+            document.getElementById('slides-container').scrollTop = 0;
+        }
+
+        window.unlockNextManual = function() {
+            const nextButton = document.getElementById('next-btn');
+            if(nextButton) nextButton.classList.add('pulsing');
+        };
+        
+        window.nextSlide = function() { if(currentSlide < totalSlides - 1) { currentSlide++; window.updateSlide(); } };
+        window.prevSlide = function() { if(currentSlide > 0) { currentSlide--; window.updateSlide(); } };
+
+        window.saveNameAndStart = () => {
+            const input = document.getElementById('s-name');
+            if(input && input.value.trim() !== '') {
+                const studentName = input.value.trim();
+                document.querySelectorAll('.dyn-name').forEach(el => el.innerText = studentName.toUpperCase());
+            }
+            window.nextSlide();
+        };
+
+        window.genericCorrect = function(hubId) {
+            document.getElementById(hubId).style.display = 'block';
+            window.unlockNextManual();
+        }
+
+        window.revealStarter = function(btn) {
+            btn.style.display = 'none';
+            const content = btn.nextElementSibling;
+            if(content && content.classList.contains('starter-content')) content.style.display = 'flex';
+        };
+
+        /* --- SMART DICT --- */
+        window.openDict = function(word) {
+            const data = vocabData[word.toLowerCase()];
+            if(!data) return;
+
+            document.getElementById('d-word').innerText = word.toUpperCase();
+            document.getElementById('d-phonetic').innerText = data.phonetic;
+            document.getElementById('d-def').innerText = data.def;
+            document.getElementById('d-context').innerText = `"${data.context}"`;
+            document.getElementById('d-speak').innerText = data.speak || '';
+            
+            document.getElementById('dict-modal').style.display = 'flex';
+            setTimeout(() => { document.getElementById('dict-modal').style.opacity = '1'; }, 10);
+        };
+
+        window.closeDict = () => {
+            document.getElementById('dict-modal').style.opacity = '0';
+            setTimeout(() => { document.getElementById('dict-modal').style.display = 'none'; }, 300);
+        }
+
+        window.openBox = (el, word, nextBtnId) => {
+            el.classList.add('opened');
+            window.openDict(word);
+            if(nextBtnId) {
+                const btn = document.getElementById(nextBtnId);
+                if(btn) btn.style.display = 'inline-flex';
+            }
+        };
+
+        /* --- GRAMMAR SANDBOX --- */
+        window.switchSand = function(btn, sentence, label) {
+            let siblings = btn.parentElement.children;
+            for(let s of siblings) { s.style.background = 'rgba(0,0,0,0.5)'; s.style.color = '#FFFFFF'; s.style.borderColor = 'rgba(255,255,255,0.2)'; }
+            btn.style.background = 'var(--brand-main)'; btn.style.color = '#000000'; btn.style.borderColor = 'var(--brand-main)';
+            
+            const words = sentence.split(' ');
+            let formatted = words.map(w => {
+                if(w.includes('SHOULD') || w.includes('SHOULDN\'T') || w.includes('OUGHT')) return `<span style="color:var(--brand-main); font-weight: bold;">${w}</span>`;
+                return w;
+            }).join(' ');
+
+            document.getElementById('sand-text').innerHTML = formatted;
+            document.getElementById('sand-label').innerText = label;
+        }
+
+        window.switchSand2 = function(btn, sentence, label) {
+            let siblings = btn.parentElement.children;
+            for(let s of siblings) { s.style.background = 'rgba(0,0,0,0.5)'; s.style.color = '#FFFFFF'; s.style.borderColor = 'rgba(255,255,255,0.2)'; }
+            btn.style.background = 'var(--brand-main)'; btn.style.color = '#000000'; btn.style.borderColor = 'var(--brand-main)';
+            
+            const words = sentence.split(' ');
+            let formatted = words.map(w => {
+                if(w.includes('MUST') || w.includes('HAVE') || w.includes('DON\'T') || w.includes('MUSTN\'T')) return `<span style="color:var(--brand-main); font-weight: bold;">${w}</span>`;
+                return w;
+            }).join(' ');
+
+            document.getElementById('sand2-text').innerHTML = formatted;
+            document.getElementById('sand2-label').innerText = label;
+        }
+
+        /* --- MCQ & DILEMMA --- */
+        window.checkMCQ = function(btn, isCorrect, hubId) {
+            if(btn.parentElement.classList.contains('locked')) return;
+            if(isCorrect) {
+                btn.classList.add('correct');
+                const icon = btn.querySelector('i');
+                if(icon) icon.className = 'fa-solid fa-check-circle mr-[15px]';
+                btn.parentElement.classList.add('locked');
+                if (hubId) {
+                    document.getElementById(hubId).style.display = 'block';
+                } else {
+                    document.getElementById('hub-mcq').style.display = 'block';
+                }
+                window.unlockNextManual();
+                Array.from(btn.parentElement.children).forEach(c => {
+                    if(c !== btn) c.style.opacity = '0.5';
+                });
+            } else {
+                btn.classList.add('incorrect');
+                const icon = btn.querySelector('i');
+                if(icon) icon.className = 'fa-solid fa-times-circle mr-[15px]';
+                window.takeDamage();
+                setTimeout(() => {
+                    btn.classList.remove('incorrect');
+                    if(icon) icon.className = 'fa-regular fa-circle mr-[15px]';
+                }, 800);
+            }
+        }
+
+        /* --- CLASSIFIER / SORTER --- */
+        const beltWords = [
+            {w: "I noticed a mistake. Let's fix it.", t: 'CANDOR'}, 
+            {w: "You are doing great! (but they are failing)", t: 'RUINOUS'},
+            {w: "I care about you, so I must tell you this.", t: 'CANDOR'}, 
+            {w: "Avoiding a hard conversation to be nice.", t: 'RUINOUS'}
+        ];
+        let currentBeltIndex = 0;
+        
+        window.classifyItem = function(guessType) {
+            if(currentBeltIndex >= beltWords.length) return;
+            const item = beltWords[currentBeltIndex];
+            const display = document.getElementById('classifier-display');
+            
+            if(guessType === item.t) {
+                currentBeltIndex++;
+                if(currentBeltIndex < beltWords.length) {
+                    display.style.opacity = '0';
+                    setTimeout(() => {
+                        display.innerText = beltWords[currentBeltIndex].w;
+                        display.style.opacity = '1';
+                    }, 200);
+                } else {
+                    display.innerText = "CLASSIFIED!";
+                    display.style.color = "var(--correct)";
+                    display.style.borderColor = "var(--correct)";
+                    document.getElementById('hub-classifier').style.display = 'block';
+                    window.unlockNextManual();
+                }
+            } else {
+                display.style.color = "var(--incorrect)";
+                display.style.borderColor = "var(--incorrect)";
+                display.style.animation = 'shake 0.4s';
+                window.takeDamage();
+                setTimeout(() => { 
+                    display.style.color = "var(--brand-main)"; 
+                    display.style.borderColor = "var(--brand-main)"; 
+                    display.style.animation = ''; 
+                }, 400);
+            }
+        }
+
+        /* --- SYNTAX BUILDER --- */
+        window.buildState = {};
+        window.moveWord = function(chip, dzId, targetArrayStr) {
+            if(chip.classList.contains('used')) return;
+            const targetArray = targetArrayStr.split(',');
+            const word = chip.innerText;
+            const dz = document.getElementById(dzId);
+            const newChip = document.createElement('div');
+            newChip.className = 'word-chip'; 
+            newChip.style.background = 'var(--brand-main)';
+            newChip.style.color = '#fff';
+            newChip.innerText = word;
+            if (!chip.id) chip.id = 'chip_' + Math.random().toString(36).substr(2, 9);
+            newChip.dataset.sourceId = chip.id;
+            
+            newChip.onclick = function() {
+                if(dz.classList.contains('success')) return;
+                dz.removeChild(this); document.getElementById(this.dataset.sourceId).classList.remove('used');
+                const idx = window.buildState[dzId].lastIndexOf(this.innerText);
+                if(idx !== -1) window.buildState[dzId].splice(idx, 1);
+            };
+            
+            dz.appendChild(newChip); chip.classList.add('used');
+            if(!window.buildState[dzId]) window.buildState[dzId] = [];
+            window.buildState[dzId].push(word);
+
+            if(window.buildState[dzId].length === targetArray.length) {
+                if(JSON.stringify(window.buildState[dzId]) === JSON.stringify(targetArray)) {
+                    dz.classList.add('success'); 
+                    Array.from(dz.children).forEach(c => { c.style.background = 'var(--correct)'; c.style.color = '#000'; c.style.border = 'none'; c.style.cursor = 'default'; });
+                    document.getElementById('hub-syn1').style.display = 'block';
+                    window.unlockNextManual();
+                } else {
+                    dz.style.borderColor = 'var(--incorrect)'; dz.style.animation = 'shake 0.4s';
+                    window.takeDamage();
+                    setTimeout(() => { dz.innerHTML = ''; dz.style.borderColor = 'rgba(255,255,255,0.2)'; dz.style.animation = ''; window.buildState[dzId] = []; chip.parentElement.querySelectorAll('.word-chip').forEach(c => c.classList.remove('used')); }, 1000);
+                }
+            }
+        }
+
+        /* --- ERROR ISOLATION --- */
+        window.checkMistakeMega = function(span, isMistake, correctWord) {
+            if(span.parentElement.classList.contains('solved')) return;
+            if(isMistake) {
+                span.innerText = correctWord;
+                span.classList.remove('hover:bg-brand-main/40', 'border-transparent');
+                span.classList.add('bg-gradient-to-r', 'from-emerald-600', 'to-emerald-500', 'text-white', 'shadow-[0_0_20px_rgba(16,185,129,0.8)]', 'border-emerald-400');
+                span.parentElement.classList.add('solved');
+                document.getElementById('hub-mistake').style.display = 'block';
+                window.unlockNextManual();
+            } else {
+                span.classList.add('bg-red-500', 'shake', 'text-white');
+                window.takeDamage();
+                setTimeout(() => span.classList.remove('bg-red-500', 'shake', 'text-white'), 500);
+            }
+        }
+
+        /* --- DATA RECOVERY MEGA DRILL --- */
+        window.checkRecoveryMega = function() {
+            const r1 = document.getElementById('rec-1').value;
+            const r2 = document.getElementById('rec-2').value;
+            const r3 = document.getElementById('rec-3').value;
+            const btn = document.getElementById('rec-btn');
+            
+            if(r1 === "Obnoxious Aggression" && r2 === "Ruinous Empathy" && r3 === "shouldn't") {
+                for(let i=1; i<=3; i++) {
+                    let el = document.getElementById('rec-'+i);
+                    el.classList.replace('text-white', 'text-emerald-400');
+                    el.classList.replace('border-[#334155]', 'border-emerald-500');
+                    el.disabled = true;
+                }
+                
+                document.getElementById('hub-recovery').style.display = 'block';
+                btn.style.display = 'none';
+                window.unlockNextManual();
+            } else {
+                btn.classList.add('shake');
+                window.takeDamage();
+                setTimeout(() => btn.classList.remove('shake'), 500);
+            }
+        }
+
+        /* --- FACT CHECKER --- */
+        window.checkFact = function(btn, isCorrect, id) {
+            const box = document.getElementById('fc-box');
+            if(box.classList.contains('locked')) return;
+            box.classList.add('locked');
+            
+            const stamp = document.getElementById('fc-stamp');
+            if(isCorrect) { 
+                stamp.innerText = 'VERIFIED';
+                stamp.className = 'absolute inset-0 flex items-center justify-center font-display font-black text-6xl stamp-mark show-verified';
+                box.style.borderColor = 'var(--correct)';
+            } else {
+                stamp.innerText = 'FAKE NEWS';
+                stamp.className = 'absolute inset-0 flex items-center justify-center font-display font-black text-6xl stamp-mark show-fake';
+                box.style.borderColor = 'var(--incorrect)';
+                window.takeDamage();
+            }
+            setTimeout(() => {
+                document.getElementById('hub-fc').style.display = 'block';
+                window.unlockNextManual();
+            }, 1000);
+        }
+
+        /* --- STAND YOUR GROUND --- */
+        window.selectAgree = function(btn, type) {
+            const container = document.getElementById('agree-box');
+            if(container.classList.contains('locked')) return;
+            
+            Array.from(container.children).forEach(b => {
+                b.style.opacity = '0.3';
+                b.style.pointerEvents = 'none';
+            });
+            btn.style.opacity = '1';
+            
+            btn.style.background = type === 'agree' ? 'var(--correct)' : type === 'neutral' ? '#f59e0b' : 'var(--incorrect)';
+            btn.style.color = '#000';
+            container.classList.add('locked');
+            document.getElementById('hub-agree').style.display = 'block';
+            window.unlockNextManual();
+        }
+
+        /* --- PHONE SIMULATOR --- */
+        window.advanceChat = function(isCorrect) {
+            const btn = event.target;
+            if(!isCorrect) { 
+                btn.style.borderColor = 'var(--incorrect)';
+                btn.classList.add('shake');
+                window.takeDamage();
+                setTimeout(() => { btn.style.borderColor = 'rgba(255,255,255,0.1)'; btn.classList.remove('shake'); }, 500);
+                return; 
+            }
+            const chatOpts = document.getElementById('chat-opts');
+            const chatArea = document.getElementById('chat-area');
+            chatOpts.innerHTML = '';
+            
+            const sentMsg = document.createElement('div');
+            sentMsg.className = 'msg-sent phone-msg text-white font-bold block shadow-[0_0_10px_rgba(0,115,192,0.4)]';
+            sentMsg.innerText = btn.innerText;
+            
+            const typingDot = document.getElementById('typing-dot');
+            if(typingDot) { chatArea.insertBefore(sentMsg, typingDot); typingDot.style.display = 'none'; } else { chatArea.appendChild(sentMsg); }
+            chatArea.scrollTop = chatArea.scrollHeight;
+            setTimeout(() => { document.getElementById('hub-chat').style.display = 'block'; window.unlockNextManual(); }, 500); 
+        };
+
+        /* --- RPG ROLEPLAY --- */
+        window.handleRPG = function(nodeNum, isCorrect) {
+            if(isCorrect) {
+                if(nodeNum === 3) { 
+                    document.getElementById('p_22_arena').style.display = 'block';
+                    window.unlockNextManual(); 
+                } else if(nodeNum === 2) {
+                    document.getElementById('p_21_arena').style.display = 'block';
+                    window.unlockNextManual(); 
+                } else if(nodeNum === 1) {
+                    document.getElementById('p_20_arena').style.display = 'block';
+                    window.unlockNextManual(); 
+                }
+            } else {
+                window.takeDamage();
+            }
+        }
+
+        /* --- TEACHER TOOLS & ALERTS --- */
+        window.toggleFullscreen = function() {
+            try { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(()=>{}); } else { document.exitFullscreen(); } } catch (err) {}
+        };
+
+        let hudTimerInt; let hudTime = 60;
+        window.startTimer = function() {
+            clearInterval(hudTimerInt); hudTime = 60;
+            const tEl = document.getElementById('dmTimer');
+            tEl.innerText = "00:60"; tEl.style.color = "var(--brand-main)";
+            hudTimerInt = setInterval(() => {
+                hudTime--; tEl.innerText = `00:${hudTime < 10 ? '0'+hudTime : hudTime}`;
+                if(hudTime <= 10) tEl.style.color = "var(--incorrect)";
+                if(hudTime <= 0) clearInterval(hudTimerInt);
+            }, 1000);
+        };
+        
+        window.toggleCorrectionMode = function() { document.body.classList.toggle('correction-mode'); };
+        
+        window.showAlert = function(msg, type) {
+            const overlay = document.getElementById('alert-screen');
+            const textEl = document.getElementById('alert-msg');
+            textEl.innerHTML = msg; textEl.className = 'alert-text alert-' + type;
+            overlay.classList.add('show');
+            setTimeout(() => { overlay.classList.remove('show'); }, 2500);
+        };
+        
+        let starCount = 0;
+        window.awardStar = function() { 
+            starCount++; 
+            const finalScore = document.getElementById('finalScoreDisplay');
+            if(finalScore) {
+                finalScore.innerText = (starCount * 50) + ' XP';
+            }
+            window.showAlert('XP<br>OBTAINED!', 'star'); 
+        };
+
+        window.takeDamage = function() {
+            const flash = document.getElementById('damageFlash');
+            if (flash) {
+                flash.style.display = 'block';
+                setTimeout(() => { flash.style.display = 'none'; }, 400);
+            }
+        };
+
+        window.toggleSidebar = function(id) {
+            let el = document.getElementById(id);
+            if (!el) return;
+            const mainContainer = document.getElementById('slides-container');
+            
+            if(el.classList.contains('open') || el.classList.contains('right-open')) {
+                el.classList.remove('open', 'right-open');
+                mainContainer.style.transform = 'scale(1) translateX(0)';
+            } else {
+                document.querySelectorAll('.sidebar-panel, .teacher-hud').forEach(p => p.classList.remove('open', 'right-open'));
+                
+                if (id === 'teacher-hud') {
+                    el.classList.add('open');
+                    mainContainer.style.transform = 'scale(0.95) translateX(2vw)';
+                } else {
+                    el.classList.add('right-open');
+                    mainContainer.style.transform = 'scale(0.95) translateX(-2vw)';
+                }
+            }
+        };
+
+        window.onload = () => { updateSlide(); };
+    </script>
+</body>
+</html>
